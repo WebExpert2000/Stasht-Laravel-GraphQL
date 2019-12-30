@@ -1,0 +1,109 @@
+"Can be used as an argument to upload files using https://github.com/jaydenseric/graphql-multipart-request-spec"
+scalar Upload
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
+
+input SyncFacebookInput {
+    email: String
+    phone_number: String
+    password: String!
+}
+
+input SyncInstagramInput {
+    email: String
+    phone_number: String
+    username: String
+    password: String!
+}
+
+input LoginFacebookInput {
+    email: String
+    phone_number: String
+    password: String!
+}
+
+input SyncSettingInput {
+    instagram: Boolean!
+    facebook: Boolean!
+}
+
+input SearhPostsInput {
+    keyword: String!
+}
+
+input StashtPostInput {
+    post_id: ID!
+    story_id: ID!
+}
+
+# Response
+type GeneralResponse {
+    status: String!
+    message: String
+}
+
+type SearhPostsResponse implements GeneralResponse {
+    posts: [Post!]
+}
+
+type PublishEmailLinkResponse implements GeneralResponse {
+    # Email Link
+    link: String
+}
+
+type PublishFacebookResponse implements GeneralResponse {
+    # Facebook Link
+    link: String
+}
+
+# Mutation
+# extend type Mutation {
+    # "Sc3 Facebook Login"
+
+    # "Sc4 Facebook/Instagram account confirm"
+    # syncFacebookAccount(data: SyncFacebookInput): GeneralResponse
+    # syncInstagramAccount(data: SyncInstagramInput): GeneralResponse
+    #
+    # # "Sc4, Sc19, this is for synchronizing action"
+    # updateSyncSetting(data: SyncSettingInput): GeneralResponse
+    #
+    # # "Sc20 Search Posts"
+    # searchPosts(data: SearchPostsInput): SearhPostsResponse!
+    #
+    # # "Sc7 Stasht Post"
+    # stashtPost(data: StashtPostInput): GeneralResponse
+    #
+    # # "Sc19 Invite Friends"
+    # inviteFriends(user_id: ID!, friends: [InvitedFriend]): GeneralResponse
+    #
+    # # "Post CRUD"
+    # createPost(description: String, media: Upload): Post
+    # updatePost(id: ID!, description: String, media: Upload): Post
+    # deletePost(id: ID!): GeneralResponse
+    #
+    # # "Story CRUD"
+    # createStory(
+    #     title: String!
+    #     description: String
+    #     user_id: ID!
+    #     medias: [Upload]
+    #     stashtags: [String!]!
+    #     friends: [InvitedFriend]
+    # ): Story
+    # updateStory(
+    #     id: ID!
+    #     title: String
+    #     description: String
+    #     user_id: ID!
+    #     medias: [Upload]
+    #     stashtags: [String!]!
+    #     friends: [InvitedFriend]
+    # ): Story
+    # deleteStory(id: ID!): GeneralResponse
+    #
+    # # "Sc10 Make it back Live Story"
+    # makeLiveStory(id: ID!): GeneralResponse
+    #
+    # # "Sc15 Publish Story"
+    # createEmailLinkStory(id: ID!): PublishEmailLinkResponse
+    # publishFacebookStory(id: ID!): PublishFacebookResponse
+# }

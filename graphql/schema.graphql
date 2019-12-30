@@ -1,0 +1,178 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-01-01 13:00:00`."
+scalar DateTime
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A date string with format `Y-m-d`, e.g. `2011-05-23`."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+type Query {
+    users: [User!]! @paginate(type: "paginator", model: "App\\Models\\User")
+    user(id: ID @eq): User @find
+
+    profiles: [Profile] @all
+    profile(id: ID @eq): Profile @find
+
+    # stories: [Story] @all
+    # story(id: ID @eq): Story @find
+
+    posts: [Post] @all
+    post(id: ID @eq): Post @find
+
+    # stashtags: [Stashtag] @all
+    # stashtag(name: String @eq): Stashtag @findByName
+
+    "API for getting recent posts from facebook"
+    fbPost: FbPostOutput!  @middleware(checks: ["auth:api"])
+                    @field(
+                        resolver: "App\\GraphQL\\Queries\\FbPost@resolve"
+                    )
+
+    "API for getting recent posts from instagram"
+    igPost: IgPostOutput!  @middleware(checks: ["auth:api"])
+                    @field(
+                        resolver: "App\\GraphQL\\Queries\\IgPost@resolve"
+                    )
+
+    me: User @middleware(checks: ["auth:api"]) @auth
+}
+
+type Mutation {
+
+    "Register general user"
+    createUser(
+        name: String! @rules(apply: ["required", "min:4"])
+        email: String! @rules(apply: ["email", "unique:users"])
+        password: String! @rules(apply: ["min:6"]) @bcrypt
+    ): User! @create
+
+    """
+    Post action after login with Facebook Account. This accepts OAuth token returned by Facebook OAuth Provider and exports unique access_token.
+    """
+    signInWithFBUser(token: String!): AuthPayload!
+        @field(
+            resolver: "App\\GraphQL\\Mutations\\SignInWithFBUser@resolve"
+        )
+
+    """
+    Post action after login with Instagram Account. This accepts OAuth token returned by Instagram OAuth Provider and exports unique access_token.
+    """
+    signInWithIGUser(token: String!): AuthPayload!
+        @field(
+            resolver: "App\\GraphQL\\Mutations\\SignInWithIGUser@resolve"
+        )
+
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    email_verified_at: DateTime!
+    created_at: DateTime!
+    updated_at: DateTime!
+    profile: Profile! @hasOne
+}
+
+type Profile {
+    id: ID!
+    birthday: Date
+    phone_number: String
+    image_url: String
+    sync_instagram: Boolean!
+    sync_facebook: Boolean!
+    user: User! @belongsTo
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+enum StoryStatus {
+    LIVE @enum(value: 0)
+    PUBLISHED @enum(value: 1)
+}
+
+type Story {
+    id: ID!
+    title: String
+    description: String
+    status: StoryStatus!
+    cover_image: String
+    published_link: String
+    publsihed_fb: Boolean
+    user: User! @belongsTo
+    posts: [Post!]! @hasMany
+    friends: [InvitedFriend!] @hasMany
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+enum PostMediaType {
+    PHOTO @enum(value: 0)
+    VIDEO @enum(value: 1)
+}
+
+enum PostSource {
+    INSTAGRAM @enum(value: 0)
+    FACEBOOK @enum(value: 1)
+    NATIVE @enum(value: 2)
+}
+
+type Post {
+    id: ID!
+    source: PostSource!
+    media_type: PostMediaType!
+    description: String
+    user: User @belongsTo
+    medias: [Media!]! @hasMany
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Media {
+    id: ID!
+    url: String!
+    status: Boolean
+    post: Post @belongsTo
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type InvitedFriend {
+    id: ID!
+    first_name: String
+    last_name: String
+    email: String
+    phone_number: String
+    avatar: String
+    user: User @belongsTo
+    story: Story @belongsTo
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Stashtag {
+    id: ID!
+    name: String!
+    stories: [Story] @hasMany
+    posts: [Post] @hasMany
+}
+
+"Input schema for mutation:signInWithFBUser"
+input SignInWithFBUserInput{
+    "Facebook Account Username"
+    username: String!
+}
+
+type IgPostOutput{
+    success: Boolean!
+    posts: String!
+}
+
+type FbPostOutput{
+    success: Boolean!
+    posts: String!
+}

@@ -1,0 +1,12 @@
+/node_modules
+/public/hot
+/public/storage
+/vendor
+.env
+.phpunit.result.cache
+.prettierrc
+Homestead.json
+Homestead.yaml
+npm-debug.log
+heroku_log.txt
+yarn-error.log
